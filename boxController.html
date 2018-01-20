@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Swamp Box</title>
+    <!--[if IE]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- jQuery UI theme -->
+    <link rel="stylesheet" type="text/css" href="external/jquery-ui/jquery-ui.css">
+
+    <!-- pinpad CSS -->
+    <link rel="stylesheet" type="text/css" href="dist/jquery.ui.pinpad.css">
+
+</head>
+
+<body id="home">
+    <h1>Swamp Box</h1>
+
+    <btn id="pickup" class ="btn btn-primary trigger">Pickup</btn>
+    <btn id="dropoff" class="btn btn-info trigger">DropOff</btn>
+    <div id="container" class="col-sm-12">
+        <input id="pinpad" class="selector" hidden>
+    </div>
+
+
+
+
+
+    <!-- external libraries -->
+    <script src="external/jquery/jquery.js"></script>
+    <script src="external/jquery-ui/jquery-ui.js"></script>
+
+    <!-- pinpad widget -->
+    <script src="dist/jquery.ui.pinpad.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            var boxapi = 'http://54.89.180.9:8080/';
+
+            var boxData = {
+                id: 1,
+                pin: 0000,
+            };
+
+            var boxMain = {
+                requestSuccess: function(err, data){
+                    console.log("im here");
+                    if(data.success){
+                        //TODO open lock here
+                        location.reload();
+                    }
+                    alert(data.mesage);
+                }
+            };
+
+            var route = "";
+
+            $("#pickup").click(function(){
+                route = "pickup";
+                console.log(route);
+            });
+
+            $("#dropoff").click(function(){
+                route = "dropoff";
+                console.log(route);
+            });
+
+            $(".trigger").click(function(){
+                $("#pinpad").attr("hidden", false);
+                $("#pinpad").pinpad({
+                    appendTo: "#container",
+                    confirm: function( event, ui ) {
+                        boxData.pin = $( ".selector" ).pinpad( "value" );
+                        console.log(boxData.pin);
+                        loadXMLDoc();
+                    }
+                });
+            });
+
+            $( ".selector" ).on( "pinpadconfirm", function( event, ui ) {} );
+
+            function loadXMLDoc() {
+                var xmlhttp = new XMLHttpRequest();
+
+                xmlhttp.onreadystatechange = function() {
+                    if (xmlhttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
+                        if (xmlhttp.status == 200) {
+                            console.log(xmlhttp.responseText);
+                            if(xmlhttp.success){
+                                //TODO open lock here
+                                //confirm
+                            }
+                            alert(data.mesage);
+//                            document.getElementById("myDiv").innerHTML = xmlhttp.responseText;
+                        }
+                        else {
+                            alert('something else other than 200 was returned');
+                        }
+                    }
+                };
+
+                xmlhttp.open("POST", boxapi + route, true);
+                xmlhttp.send();
+            }
+        } );
+
+    </script>
+</body>
+</html>
