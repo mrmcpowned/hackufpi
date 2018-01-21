@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Swamp Box</title>
+    <title>SwampBox</title>
     <!--[if IE]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -77,13 +77,18 @@
             font-size: 2.5vw
         }
         
+        #pinpad{
+            position: relative;
+        }
+        
         #pin-input_output{
             margin-bottom: 10px;
             text-align: center;
-            background: rgba(255,255,255,.65);
+            background: rgba(255,255,255,.5);
             border: none;
             outline: none;
-            font-size: 3.5vw
+            font-size: 3.5vw;
+            width: 100%
         }
         
         .trigger.selected{
@@ -124,6 +129,31 @@
             filter: invert(1);
         }
         
+        #error{
+            position: absolute;
+            top: 0;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255,0,0,.95);
+            color: white;
+        }
+        
+        #error:empty{
+            display: none;
+        }
+        
+        .input-area{
+            display: none;
+        }
+        
+        .input-area.visible{
+            display: block;
+        }
+        
     </style>
     
 </head>
@@ -139,8 +169,10 @@
             <button id="pickup" class ="btn btn-primary trigger">Pickup</button>
             <button id="dropoff" class="btn btn-info trigger">DropOff</button>
         </div>
-        <input id="pin-input" class="selector" hidden>
-        <div id="pinpad"></div>
+        <div class="input-area">
+            <input id="pin-input" class="selector" hidden>
+            <div id="pinpad"><div id="error"></div></div>
+        </div>
     </div>
 
 
@@ -177,23 +209,24 @@
             var endpoint = "pickup";
 
             function processRequest(type = "pin"){
-                var postUrl = serverUrl + endpoint;
+                var postUrl = serverUrl;
                 
                 if(type == "face"){
                     postUrl = "http://localhost:5000/";
                 }
                 
+                postUrl += endpoint;
+                
                 $.ajax({
                     url: postUrl,
                     type: "POST",
-                    data: boxData,
-                    done: function( data, textStatus, jqXHR ) {
+                    data: boxData
+                })
+                .done(function( data, textStatus, jqXHR ) {
                         window.location.reload();
-                    },
-                    fail: function( jqXHR, textStatus, errorThrown ) {
+                })
+                .fail(function( jqXHR, textStatus, errorThrown ) {
                         alert("Error: " + errorThrown);
-                    }
-                    
                 });
                 
             }
@@ -212,6 +245,7 @@
                 $(this).addClass("selected");
                 
                 $("#pin-input").attr("hidden", false);
+                $(".input-area").addClass("visible");
                 $("#pin-input").pinpad({
                     appendTo: "#pinpad",
                     confirm: function( event, ui ) {
