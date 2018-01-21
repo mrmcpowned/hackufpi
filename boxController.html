@@ -217,6 +217,11 @@
                 return s && s[0].toUpperCase() + s.slice(1);
             }
             
+            function clearError(){
+                $("#error").empty();
+                $("#error").removeClass();
+            }
+            
             function showError(message, type="error"){
                 var elm = $("<span>");
                 elm.addClass("message");
@@ -231,6 +236,7 @@
                 
                 $.ajax({
                     url: postUrl,
+                    before: clearError,
                     type: "POST",
 //                    data: boxData
                     data: boxData
@@ -301,8 +307,7 @@
             });
             
             $("#error").on("click", function(e){
-                $(this).empty();
-                $(this).removeClass();
+                clearError();
             });
             
         } );
