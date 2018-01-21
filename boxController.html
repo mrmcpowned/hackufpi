@@ -13,16 +13,134 @@
 
     <!-- pinpad CSS -->
     <link rel="stylesheet" type="text/css" href="dist/jquery.ui.pinpad.css">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <style type="text/css">        
+        body{
+            background: #FFEFCF;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: space-around
+        }
+        
+        
+        .hero, .keypad{
+            flex-grow: 1;
+            display: flex;                                                                                                                                                                                                       
+            flex-direction: column;
+        }
+        
+        .hero{
+/*            width: 30%;*/
+            order: 1;
+            flex-basis: 35%;
+            flex-shrink: 0;
+            flex-grow: 0;
+            text-align: center;
+            padding-right: 50px;
+/*            flex-grow: 1;*/
+        }
+        
+        .hero img{
+            max-width: 100%;
+        }
+        
+        .keypad, .hero{
+/*            align-items: flex-start*/
+            box-sizing: border-box;
+            justify-content: center;
+            align-self: center
+        }
+        
+        .keypad{
+            padding: 50px;
 
+        }
+
+        .choices{
+            display: flex;
+            flex-direction: row;
+            flex-grow: 1;
+            justify-content: space-between;
+            margin-bottom: 10px
+        }
+        
+        .trigger{
+            flex-basis: 48%;
+            height: 50px;
+            opacity: .5;
+        }
+        
+        #pinpad, #pin-input_output{
+            font-size: 2.5vw
+        }
+        
+        #pin-input_output{
+            margin-bottom: 10px;
+            text-align: center;
+            background: rgba(255,255,255,.65);
+            border: none;
+            outline: none;
+            font-size: 3.5vw
+        }
+        
+        .trigger.selected{
+            opacity: 1;
+        }
+        
+        .ui-pinpad{
+            background: none;
+            border: none !important;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: stretch
+        }
+        
+        .ui-pinpad-command-panel {
+            width: 100%;
+        }
+        
+        .ui-pinpad-command-panel table{
+            width: 100%;
+        }
+        
+        .ui-pinpad-command-correct:active{
+            background: yellow;
+            color: black;
+        }
+        
+        .ui-pinpad-command-confirm:active{
+            background: green;
+        }
+        
+        .ui-pinpad-command-cancel:active{
+            background: red;
+        }
+        
+        .ui-pinpad-command-correct:active .ui-icon{
+            filter: invert(1);
+        }
+        
+    </style>
+    
 </head>
 
 <body id="home">
-    <h1>Swamp Box</h1>
-
-    <btn id="pickup" class ="btn btn-primary trigger">Pickup</btn>
-    <btn id="dropoff" class="btn btn-info trigger">DropOff</btn>
-    <div id="container" class="col-sm-12">
-        <input id="pinpad" class="selector" hidden>
+    
+    <div class="hero">
+       <img src="imgs/swamp-logo.png" alt="">
+        <h1 class="title">SwampBox</h1>
+    </div>
+    <div class="keypad">
+        <div class="choices">
+            <button id="pickup" class ="btn btn-primary trigger">Pickup</button>
+            <button id="dropoff" class="btn btn-info trigger">DropOff</button>
+        </div>
+        <input id="pin-input" class="selector" hidden>
+        <div id="pinpad"></div>
     </div>
 
 
@@ -38,14 +156,14 @@
     <script type="text/javascript">
 
         $(document).ready(function() {
-            var boxapi = 'http://54.89.180.9:8080/';
+            var serverUrl = 'http://54.89.180.9:8080/';
 
             var boxData = {
                 id: 1,
                 pin: 0000,
             };
 
-            var boxMain = {
+            /*var boxMain = {
                 requestSuccess: function(err, data){
                     console.log("im here");
                     if(data.success){
@@ -54,57 +172,82 @@
                     }
                     alert(data.mesage);
                 }
-            };
+            };*/
 
-            var route = "";
+            var endpoint = "pickup";
 
+            function processRequest(type = "pin"){
+                var postUrl = serverUrl + endpoint;
+                
+                if(type == "face"){
+                    postUrl = "http://localhost:5000/";
+                }
+                
+                $.ajax({
+                    url: postUrl,
+                    type: "POST",
+                    data: boxData,
+                    done: function( data, textStatus, jqXHR ) {
+                        window.location.reload();
+                    },
+                    fail: function( jqXHR, textStatus, errorThrown ) {
+                        alert("Error: " + errorThrown);
+                    }
+                    
+                });
+                
+            }
+            
             $("#pickup").click(function(){
-                route = "pickup";
-                console.log(route);
+                endpoint = "pickup";
+                console.log(endpoint);
             });
 
             $("#dropoff").click(function(){
-                route = "dropoff";
-                console.log(route);
+                endpoint = "dropoff";
             });
 
             $(".trigger").click(function(){
-                $("#pinpad").attr("hidden", false);
-                $("#pinpad").pinpad({
-                    appendTo: "#container",
+                $(".trigger").removeClass("selected");
+                $(this).addClass("selected");
+                
+                $("#pin-input").attr("hidden", false);
+                $("#pin-input").pinpad({
+                    appendTo: "#pinpad",
                     confirm: function( event, ui ) {
                         boxData.pin = $( ".selector" ).pinpad( "value" );
                         console.log(boxData.pin);
-                        loadXMLDoc();
-                    }
+                        processRequest();
+                    },
+                    faceid: function( event, ui ){
+                        processRequest("face");
+                    },
+                    commands: [
+                        {
+                            position: 0,
+                            name: "cancel",
+                            options: { icon: "ui-icon-close", iconPosition: "end" }
+                        },
+                        {
+                            position: 1,
+                            name: "correct",
+                            options: { icon: "ui-icon-caret-1-w", iconPosition: "end" }
+                        },
+                        {
+                            position: 2,
+                            name: "confirm",
+                            options: { icon: "ui-icon-radio-off", iconPosition: "end" }
+                        },
+                        {
+                            position: 3,
+                            name: "faceid",
+                            options: { icon: "ui-icon-person", iconPosition: "end", 
+                                      label: "Face ID" }
+                        }
+                    ]
                 });
             });
-
-            $( ".selector" ).on( "pinpadconfirm", function( event, ui ) {} );
-
-            function loadXMLDoc() {
-                var xmlhttp = new XMLHttpRequest();
-
-                xmlhttp.onreadystatechange = function() {
-                    if (xmlhttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
-                        if (xmlhttp.status == 200) {
-                            console.log(xmlhttp.responseText);
-                            if(xmlhttp.success){
-                                //TODO open lock here
-                                //confirm
-                            }
-                            alert(data.mesage);
-//                            document.getElementById("myDiv").innerHTML = xmlhttp.responseText;
-                        }
-                        else {
-                            alert('something else other than 200 was returned');
-                        }
-                    }
-                };
-
-                xmlhttp.open("POST", boxapi + route, true);
-                xmlhttp.send();
-            }
+            
         } );
 
     </script>
