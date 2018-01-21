@@ -206,7 +206,7 @@
                 }
             };*/
 
-            var endpoint = "pickup";
+            var endpoint = "pickupPin";
 
             function processRequest(type = "pin"){
                 var postUrl = serverUrl;
@@ -232,12 +232,12 @@
             }
             
             $("#pickup").click(function(){
-                endpoint = "pickup";
+                endpoint = "pickupPin";
                 console.log(endpoint);
             });
 
             $("#dropoff").click(function(){
-                endpoint = "dropoff";
+                endpoint = "dropoffPin";
             });
 
             $(".trigger").click(function(){
@@ -280,6 +280,10 @@
                         }
                     ]
                 });
+            });
+            
+            $.("#error").on("click", ".message" function(e){
+                
             });
             
         } );
