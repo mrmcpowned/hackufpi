@@ -206,38 +206,49 @@
                 }
             };*/
 
-            var endpoint = "pickupPin";
+            var endpoint = "pickup";
+            
+            function capitalize(s)
+            {
+                return s && s[0].toUpperCase() + s.slice(1);
+            }
+            
+            function showError(message){
+                var elm = $("<span>");
+                elm.addClass("message");
+                elm.html(message);
+                $("#error").append(elm);
+            }
 
             function processRequest(type = "pin"){
-                var postUrl = serverUrl;
-                
-                if(type == "face"){
-                    postUrl = "http://localhost:5000/";
-                }
-                
-                postUrl += endpoint;
+                var postUrl = serverUrl + endpoint + capitalize(type);
                 
                 $.ajax({
                     url: postUrl,
                     type: "POST",
+//                    data: boxData
                     data: boxData
                 })
                 .done(function( data, textStatus, jqXHR ) {
-                        window.location.reload();
+                        
                 })
                 .fail(function( jqXHR, textStatus, errorThrown ) {
-                        alert("Error: " + errorThrown);
+                    if(jqXHR.responseJSON){
+                        showError("Error: " + jqXHR.responseJSON.message);
+                    } else {
+                        showError("Error: " + errorThrown);
+                    }
                 });
                 
             }
             
             $("#pickup").click(function(){
-                endpoint = "pickupPin";
+                endpoint = "pickup";
                 console.log(endpoint);
             });
 
             $("#dropoff").click(function(){
-                endpoint = "dropoffPin";
+                endpoint = "dropoff";
             });
 
             $(".trigger").click(function(){
@@ -249,6 +260,7 @@
                 $("#pin-input").pinpad({
                     appendTo: "#pinpad",
                     confirm: function( event, ui ) {
+                        $(this).pinpad("clear");
                         boxData.pin = $( ".selector" ).pinpad( "value" );
                         console.log(boxData.pin);
                         processRequest();
@@ -282,8 +294,8 @@
                 });
             });
             
-            $.("#error").on("click", ".message" function(e){
-                
+            $("#error").on("click", function(e){
+                $(this).empty();
             });
             
         } );
