@@ -146,6 +146,10 @@
             display: none;
         }
         
+        #error.success{
+            background: darkgreen
+        }
+        
         .input-area{
             display: none;
         }
@@ -213,10 +217,12 @@
                 return s && s[0].toUpperCase() + s.slice(1);
             }
             
-            function showError(message){
+            function showError(message, type="error"){
                 var elm = $("<span>");
                 elm.addClass("message");
                 elm.html(message);
+                if(type == "success")
+                    $("#error").addClass("success");
                 $("#error").append(elm);
             }
 
@@ -230,7 +236,7 @@
                     data: boxData
                 })
                 .done(function( data, textStatus, jqXHR ) {
-                        
+                        showError(jqXHR.responseJSON.message, "success");
                 })
                 .fail(function( jqXHR, textStatus, errorThrown ) {
                     if(jqXHR.responseJSON){
@@ -296,6 +302,7 @@
             
             $("#error").on("click", function(e){
                 $(this).empty();
+                $(this).removeClass();
             });
             
         } );
