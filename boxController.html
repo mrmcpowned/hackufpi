@@ -260,9 +260,9 @@
                 $("#pin-input").pinpad({
                     appendTo: "#pinpad",
                     confirm: function( event, ui ) {
-                        $(this).pinpad("clear");
-                        boxData.pin = $( ".selector" ).pinpad( "value" );
+                        boxData.pin = $(this).pinpad("value");
                         console.log(boxData.pin);
+                        $(this).pinpad("clear");
                         processRequest();
                     },
                     faceid: function( event, ui ){
